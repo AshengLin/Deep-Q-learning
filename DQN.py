@@ -25,4 +25,36 @@ class DQN:
             'memory_size': 500,
             'batch_size': 32,
             'e_greedy_increment': None
+
         }
+
+    def choose_action(self, observation):
+
+
+    def plot_cost(self):
+        import matplotlib.pyplot as plt
+        plt.plot(np.arange(len(self.cost_his)), self.cost_his)
+        plt.ylabel('Cost')
+        plt.xlabel('training steps')
+        plt.show()
+
+
+def run_maze():
+    step = 0
+    for episode in range(300):
+        observation = env.reset()
+
+
+if __name__ == "__main__":
+    env = Maze()
+    eval_model = Eval_Model(num_actions=env.n_actions)
+    target_model = Target_Model(num_actions=env.n_actions)
+    RL_model = DQN(env.n_actions, env.n_features, eval_model, target_model)
+    env.after(100, run_maze)
+    env.mainloop()
+    RL_model.plot_cost()
+
+
+
+
+
