@@ -8,7 +8,15 @@ from tensorflow.keras import layers
 from maze_env import Maze
 
 class Eval_Model(tf.keras.Model):
+    def __init__(self, num_actions):
+        self.layer1 = layers.Dense(10, activation='relu')
+        self.logits = layers.Dense(num_actions, activation=None)
 
+    def call(self, inputs):
+        x = tf.convert_to_tensor(inputs)
+        layer1 = self.layer1(x)
+        logits = self.logits(layer1)
+        return logits
 
 class Target_Model(tf.keras.Model):
 
