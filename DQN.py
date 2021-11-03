@@ -19,7 +19,15 @@ class Eval_Model(tf.keras.Model):
         return logits
 
 class Target_Model(tf.keras.Model):
+    def __init__(self, num_actions):
+        self.layer1 = layers.Dense(10, trainable=False, activation='relu')
+        self.logits = layers.Dense(num_actions, trainable=False, activation=None)
 
+    def call(self, inputs):
+        x = tf.convert_to_tensor(inputs)
+        layer1 = self.layer1(x)
+        logits = self.logits(layer1)
+        return logits
 
 class DQN:
     def __init__(self, n_actions, n_features, eval_model, target_model):
@@ -47,10 +55,12 @@ class DQN:
         plt.show()
 
 
-def run_maze():
+def run_maze():  # 與環境交互
     step = 0
     for episode in range(300):
-        observation = env.reset()
+        observation = env.reset()  # reset
+        while True:
+            env.render()  # 刷新環境10次
 
 
 if __name__ == "__main__":
