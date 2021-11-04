@@ -9,6 +9,7 @@ from maze_env import Maze
 
 class Eval_Model(tf.keras.Model):
     def __init__(self, num_actions):
+        super().__init__('mlp_q_network')
         self.layer1 = layers.Dense(10, activation='relu')
         self.logits = layers.Dense(num_actions, activation=None)
 
@@ -20,6 +21,7 @@ class Eval_Model(tf.keras.Model):
 
 class Target_Model(tf.keras.Model):
     def __init__(self, num_actions):
+        super().__init__('mlp_q_network_1')
         self.layer1 = layers.Dense(10, trainable=False, activation='relu')
         self.logits = layers.Dense(num_actions, trainable=False, activation=None)
 
@@ -43,6 +45,18 @@ class DQN:
             'e_greedy_increment': None
 
         }
+        self.learn_step_counter = 0
+        self.epsilon = 0 if self.params['e_greedy_increment'] is not None else self.params['e_greedy']
+        self.memory = np.zeros((self.params['memory_size'], self.params['n_features'] * 2 + 2))
+
+        self.eval_model = eval_model
+        self.target_model = target_model
+
+        self.eval_model.compile(
+            optimizer=tf.keras.optimizers.RMSprop(lr=self.params['learning_rate']),
+            loss='mse'
+        )
+        self.cost_his = []
 
     def choose_action(self, observation):
 
