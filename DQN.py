@@ -58,6 +58,15 @@ class DQN:
         )
         self.cost_his = []
 
+    def store_transition(self, s, a, r, s_):
+        if not hasattr(self, 'memory_counter'):  # check if obtain memory_counter
+            self.memory_counter = 0
+        transition = np.hstack((s, [a, r], s_))
+        index = self.memory_counter % self.params['memory_size']  # replace memory with new memory
+        self.memory[index, :] = transition
+        self.memory_counter += 1
+
+
     def choose_action(self, observation):
 
 
