@@ -46,6 +46,8 @@ class DQN:
 
         }
         self.learn_step_counter = 0
+
+        # initialize memory
         self.epsilon = 0 if self.params['e_greedy_increment'] is not None else self.params['e_greedy']
         self.memory = np.zeros((self.params['memory_size'], self.params['n_features'] * 2 + 2))
 
@@ -68,7 +70,16 @@ class DQN:
 
 
     def choose_action(self, observation):
+        observation = observation[np.newaxis, :]
 
+        if np.random.uniform() < self.epsilon:
+            actions_value = self.eval_model.predict(observation)
+            print(actions_value)
+            action = np.argmax(actions_value)
+        else:
+            action = np.random.randint(0, self.params['n_actions'])
+        return action
+    
 
     def plot_cost(self):
         import matplotlib.pyplot as plt
