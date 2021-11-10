@@ -79,7 +79,40 @@ class DQN:
         else:
             action = np.random.randint(0, self.params['n_actions'])
         return action
-    
+
+    def learn(self):
+        if self.memory_counter > self.params['memory_size']:
+            sample_index = np.random.choise(self.params['memory_size'], size=self.params['batch_size'])
+        else:
+            sample_index = np.random.choice(self.memory_counter, size=self.params['batch_size'])
+
+        batch_memory = self.memory[sample_index, :]
+
+        q_next = self.target_model.predict(batch_memory[:, -self.params['n_features']:])
+        q_eval = self.eval_model.predict(batch_memory[:, :self.params['n_features']])
+
+        q_target = q_eval.copy()
+
+        batch_index = np.arange(self.params['batch_size'], dtype=np.int32)
+        eval_act_index = batch_memory[:, self.params['n_features']].astype(int)
+        reward = batch_memory[:, self.params['n_features'] + 1]
+
+        q_target[batch_index, eval_act_index] = reward + self.params['reward_decay'] * np.max(q_next, axis=1)
+
+        # check to replace target parameters
+        if self.learn_step_counter % self.params['replace_target_iter'] == 0:
+            for eval_layer, target_layer in zip(self.eval_model.layers, self.target_model.layers):
+                target_layer.set_weights(eval_layer.get_weights())
+            print('\ntarget_params_replaced\n')
+
+        self.cost = self.eval_model.train_on_batch(batch_memory[:, :self.params['n_features']], q_target)
+
+        self.cost_his.append(self.cost)
+
+        # increasing epsilon
+        self.epsilon = self.epsilon + self.params['e_greedy_increment'] if self.epsilon < self.params['e_greedy'] \
+            else self.params['e_greedy']
+        self.learn_step_counter += 1
 
     def plot_cost(self):
         import matplotlib.pyplot as plt
